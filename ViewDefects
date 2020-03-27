@@ -1,0 +1,110 @@
+import React, { Component } from 'react';
+import axios from 'axios';
+import TableRow from './TableRow';
+
+class ViewDefects extends Component {
+    constructor(props){
+        super(props);
+        this.state={
+            defects:[],
+            priority:0,
+            category:''
+        }
+        this.handleOnChange=this.handleOnChange.bind(this);
+    }
+    
+    componentDidMount(){
+      axios.get('http://localhost:4000/defect/view')
+        .then(response => {
+          this.setState({ defects: response.data });
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+    }
+
+    handleOnChange=(e)=>{
+     var filtereddefects= this.state.defects.filter((object, i)=>{
+        return object.priority === e.target.value
+      });
+
+      // this.state.defects.map((object, i)=>{ 
+      //   if(object.priority === e.target.value){
+      //       filtereddefects.push(object)
+      //   }
+      // });
+
+      console.log(filtereddefects);
+     this.setState({
+       priority:e.target.value,
+       defects:filtereddefects
+     })
+     console.log(e.target.value);
+     this.tabRow();
+    }
+
+    tabRow(){
+         
+      var filteredElements=null;
+      if(this.state.priority!=0){
+       filteredElements = this.state.defects
+      .filter(e => e.priority === this.state.priority)
+      .map(e => <tr>{ e }</tr>)
+      }else{
+         filteredElements = this.state.defects
+         .map(e => <tr>{ e }</tr>)
+      }
+      return this.state.defects.map(function(object, i){
+        return <TableRow obj={object} key={i} />;
+        });
+       
+       
+
+      }
+
+     
+    render() {
+      
+        return (
+            <React.Fragment>
+             <div><h4 align="center">Filter Details</h4>
+                <div>Priority: <select name="priority" className="form-control" value={this.state.priority} onChange={this.handleOnChange}>
+                             <option  value='0' >All</option>
+                             <option  value='1'>1</option>
+                             <option  value='2'>2</option>
+                             <option  value='3'>3</option>
+                     </select>
+                </div><br/>
+                <div>Category: <select name="category" className="form-control" >
+                             <option  value='0' >All</option>
+                            <option  value='UI defect'>UI defect</option>
+                             <option  value='Functional defect'>Functional defect</option>
+                             <option  value='Performance defect'>Performance defect</option>
+                     </select>
+                </div><br/>
+
+             </div><br/>  
+          <div>
+          <h3 align="center">Defect Details</h3>
+          <table className="table table-striped" style={{ marginTop: 20 }}>
+            <thead>
+              <tr>
+                <th>Defect Category</th>
+                <th>Description</th>
+                <th>Pririoty</th>
+                <th>Status</th>
+                <th>Change Status</th>
+              </tr>
+            </thead>
+            <tbody>
+                 {filteredElements}
+             
+            </tbody>
+          </table>
+        </div>
+            </React.Fragment>
+        );
+    }
+}
+
+export default ViewDefects;
